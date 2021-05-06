@@ -2,8 +2,15 @@
   display: flex;
 }
 
+@media (max-width: 768px) {
+  #root {
+    flex-wrap: wrap;
+  }
+}
+
 nav {
   width: 15%;
+  min-width: 250px;
 }
 
 nav ul {
