@@ -19,6 +19,13 @@ const NavBar = ({ onSelectChange }) => {
             <option value="9">9</option>
             <option value="10">10</option>
           </select></li>
+        <li><NavLink to="/geofencing-compact" activeClassName="selected">HEX Compact  </NavLink>
+          <select onChange={(e) => onSelectChange(e, true)} defaultValue={9}>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+            <option value="10">10</option>
+          </select></li>
       </ul>
     </nav>
   );
