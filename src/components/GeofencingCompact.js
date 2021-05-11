@@ -113,8 +113,6 @@ const coordinates = [
   ]
 ];
 
-// const revertCoords = (coords) => coords[0][0].map(item => [item[1], item[0]]);
-
 const GeofencingCompact = ({ res }) => {
   const purpleOptions = { color: 'red' };
 

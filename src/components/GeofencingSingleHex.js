@@ -117,7 +117,7 @@ const coordinates = [
 
 const GeofencingSingleHex = ({ res }) => {
   const purpleOptions = { color: 'red' };
-
+  console.table('singleHex', coordinates[0]);
   const hexagons = polyfill(coordinates[0], +res || 9);
   const coords = h3SetToMultiPolygon(hexagons, true);
 
