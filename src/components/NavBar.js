@@ -1,6 +1,5 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { polyfill } from 'h3-js';
 
 const NavBar = ({ onSelectChange, onTresholdChange }) => {
   return (
