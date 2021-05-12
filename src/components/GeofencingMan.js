@@ -1,10 +1,12 @@
 import React from 'react';
-import { MapContainer, Polygon, TileLayer } from 'react-leaflet';
+import { MapContainer, Polygon, TileLayer, LayersControl, LayerGroup } from 'react-leaflet';
 import {
   polyfill,
   h3ToParent,
-  h3ToGeoBoundary
+  h3ToGeoBoundary, compact, h3SetToMultiPolygon
 } from "h3-js";
+
+const revertCoords = (coords) => coords.map(item => [item[1], item[0]]);
 
 const coordinates = [
   [
@@ -41,11 +43,16 @@ const coordinates = [
     [-71.069508, 42.335012]
   ]
 ];
-const GeofencingCompact = ({ res, treshold }) => {
-  const colorOptions = { color: 'red' };
+const GeofencingMan = ({ res, treshold }) => {
+  const colorRed = { color: 'red' };
+  const colorBlue = { color: 'blue' };
+  const colorGreen = { color: 'green' };
 
   // Convert polygon to hexagons
   const hexagons = polyfill(coordinates[0], +res || 9, true);
+
+  const compacted = compact(hexagons);
+  const coordsCompacted = h3SetToMultiPolygon(compacted);
 
   const replaceWithParents = (hexagonsArr, treshold, res) => {
     const parentRes = res - 1; // coarser resolution than hexagons
@@ -90,15 +97,29 @@ const GeofencingCompact = ({ res, treshold }) => {
   return (
     <MapContainer center={[42.355143, -71.07476]} zoom={14}
                   scrollWheelZoom={false}>
-      <TileLayer
-        attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
-      {/*<Polygon pathOptions={purpleOptions} positions={result} />)}*/}
-      {results.map(result => <Polygon key={result.id} pathOptions={colorOptions}
-                                      positions={result.coords} />)}
+      <LayersControl position="topright">
+        <LayersControl.BaseLayer checked name="Map">
+          <LayerGroup>
+          <TileLayer
+            attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
+          <Polygon pathOptions={colorBlue} positions={revertCoords(coordinates[0])} />
+            </LayerGroup>
+        </LayersControl.BaseLayer>
+        <LayersControl.Overlay name="Parents">
+          <Polygon pathOptions={colorRed} positions={results.map(r=>r.coords)} />)}
+          {/*{results.map(result => <Polygon key={result.id} pathOptions={colorRed}*/}
+          {/*                                positions={result.coords} />)}*/}
+        </LayersControl.Overlay>
+
+        <LayersControl.Overlay name="Compact">
+          <Polygon pathOptions={colorGreen} positions={coordsCompacted} />
+        </LayersControl.Overlay>
+
+      </LayersControl>
     </MapContainer>
   );
 }
 
-export default GeofencingCompact;
+export default GeofencingMan;
