@@ -40,9 +40,9 @@ const coordinates = [
     [-71.062867, 42.335913],
     [-71.069508, 42.335012]
   ]
-]
+];
 const GeofencingCompact = ({ res, treshold }) => {
-  const purpleOptions = { color: 'red' };
+  const colorOptions = { color: 'red' };
 
   // Convert polygon to hexagons
   const hexagons = polyfill(coordinates[0], +res || 9, true);
@@ -53,7 +53,7 @@ const GeofencingCompact = ({ res, treshold }) => {
     // The hexagons with their parents
     const hexWithParents = hexagonsArr.map(hex => ({
       hexagon: hex,
-      parent: h3ToParent(hex, parentRes )
+      parent: h3ToParent(hex, parentRes)
     }));
 
     // Array of unique parents
@@ -79,10 +79,13 @@ const GeofencingCompact = ({ res, treshold }) => {
     const filtered = parentWithChildren.filter(item => item.childrenCount >= treshold);
 
     // Return h3Indices converted to coordinates
-    return filtered.map(item => h3ToGeoBoundary(item.parent));
+    return filtered.map((item, index) => ({
+      id: index,
+      coords: h3ToGeoBoundary(item.parent)
+    }));
   };
 
-  const result = replaceWithParents(hexagons, treshold, res);
+  const results = replaceWithParents(hexagons, treshold, res);
 
   return (
     <MapContainer center={[42.355143, -71.07476]} zoom={14}
@@ -91,9 +94,11 @@ const GeofencingCompact = ({ res, treshold }) => {
         attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      <Polygon pathOptions={purpleOptions} positions={result} />)}
+      {/*<Polygon pathOptions={purpleOptions} positions={result} />)}*/}
+      {results.map(result => <Polygon key={result.id} pathOptions={colorOptions}
+                                      positions={result.coords} />)}
     </MapContainer>
   );
-};
+}
 
 export default GeofencingCompact;

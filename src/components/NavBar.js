@@ -29,13 +29,7 @@ const NavBar = ({ onSelectChange, onTresholdChange }) => {
             <option value="10">10</option>
           </select></li>
         <li><NavLink to="/geofencing-real" activeClassName="selected">HEX
-          Real </NavLink>
-          <select onChange={(e) => onSelectChange(e, 'real')} defaultValue={9}>
-            <option value="7">7</option>
-            <option value="8">8</option>
-            <option value="9">9</option>
-            <option value="10">10</option>
-          </select></li>
+          Real </NavLink></li>
         <li><NavLink to="/geofencing-man" activeClassName="selected">HEX
           Manual </NavLink>
           <br />
