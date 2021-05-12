@@ -107,13 +107,13 @@ const GeofencingMan = ({ res, treshold }) => {
           <Polygon pathOptions={colorBlue} positions={revertCoords(coordinates[0])} />
             </LayerGroup>
         </LayersControl.BaseLayer>
-        <LayersControl.Overlay name="Parents">
+        <LayersControl.Overlay checked name="Parents">
           <Polygon pathOptions={colorRed} positions={results.map(r=>r.coords)} />)}
           {/*{results.map(result => <Polygon key={result.id} pathOptions={colorRed}*/}
           {/*                                positions={result.coords} />)}*/}
         </LayersControl.Overlay>
 
-        <LayersControl.Overlay name="Compact">
+        <LayersControl.Overlay checked name="Compact">
           <Polygon pathOptions={colorGreen} positions={coordsCompacted} />
         </LayersControl.Overlay>
 
