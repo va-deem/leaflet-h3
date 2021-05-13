@@ -3,7 +3,7 @@ import { MapContainer, Polygon, TileLayer, LayersControl, LayerGroup } from 'rea
 import {
   polyfill,
   h3ToParent,
-  h3ToGeoBoundary, compact, h3SetToMultiPolygon
+  h3ToGeoBoundary, compact
 } from "h3-js";
 
 const revertCoords = (coords) => coords.map(item => [item[1], item[0]]);
@@ -52,7 +52,7 @@ const GeofencingMan = ({ res, treshold }) => {
   const hexagons = polyfill(coordinates[0], +res || 9, true);
 
   const compacted = compact(hexagons);
-  const coordsCompacted = h3SetToMultiPolygon(compacted);
+  const coordsCompacted = compacted.map(a => h3ToGeoBoundary(a));
 
   const replaceWithParents = (hexagonsArr, treshold, res) => {
     const parentRes = res - 1; // coarser resolution than hexagons
