@@ -5,6 +5,7 @@ import {
   h3ToParent,
   h3ToGeoBoundary, compact
 } from "h3-js";
+import { logDOM } from '@testing-library/react';
 
 const revertCoords = (coords) => coords.map(item => [item[1], item[0]]);
 
@@ -47,9 +48,12 @@ const GeofencingMan = ({ res, treshold }) => {
   const colorRed = { color: 'red' };
   const colorBlue = { color: 'blue' };
   const colorGreen = { color: 'green' };
+  const colorBrown = { color: 'brown' };
 
   // Convert polygon to hexagons
   const hexagons = polyfill(coordinates[0], +res || 9, true);
+
+  const polyfillResults = hexagons.map(a => h3ToGeoBoundary(a));
 
   const compacted = compact(hexagons);
   const coordsCompacted = compacted.map(a => h3ToGeoBoundary(a));
@@ -115,6 +119,10 @@ const GeofencingMan = ({ res, treshold }) => {
 
         <LayersControl.Overlay checked name="Compact">
           <Polygon pathOptions={colorGreen} positions={coordsCompacted} />
+        </LayersControl.Overlay>
+
+        <LayersControl.Overlay name="Polyfill">
+          <Polygon pathOptions={colorBrown} positions={polyfillResults} />
         </LayersControl.Overlay>
 
       </LayersControl>
