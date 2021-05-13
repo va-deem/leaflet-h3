@@ -55,7 +55,11 @@ const GeofencingMan = ({ res, treshold }) => {
   const polyfillResults = hexagons.map(a => h3ToGeoBoundary(a));
 
   const compacted = compact(hexagons);
-  const coordsCompacted = compacted.map(a => h3ToGeoBoundary(a));
+  // const coordsCompacted = compacted.map(a => h3ToGeoBoundary(a));
+  const coordsCompacted2 = compacted.map((item, index) => ({
+    id: index,
+    coords: h3ToGeoBoundary(item)
+  }));
 
   const replaceWithParents = (hexagonsArr, treshold, res) => {
     const parentRes = res - 1; // coarser resolution than hexagons
@@ -117,7 +121,11 @@ const GeofencingMan = ({ res, treshold }) => {
         </LayersControl.Overlay>
 
         <LayersControl.Overlay checked name="Compact">
-          <Polygon pathOptions={colorGreen} positions={coordsCompacted} />
+          <LayerGroup>
+          {/*<Polygon pathOptions={colorGreen} positions={coordsCompacted} />*/}
+          {coordsCompacted2.map(el => <Polygon key={el.id} pathOptions={colorGreen}
+                                          positions={el.coords} />)}
+            </LayerGroup>
         </LayersControl.Overlay>
 
         <LayersControl.Overlay name="Polyfill">
