@@ -5,7 +5,6 @@ import {
   h3ToParent,
   h3ToGeoBoundary, compact
 } from "h3-js";
-import { logDOM } from '@testing-library/react';
 
 const revertCoords = (coords) => coords.map(item => [item[1], item[0]]);
 
