@@ -1,9 +1,16 @@
-import React from 'react';
-import { MapContainer, Polygon, TileLayer, LayersControl, LayerGroup } from 'react-leaflet';
+import React, { useState } from 'react';
+import {
+  MapContainer,
+  Polygon,
+  TileLayer,
+  LayersControl,
+  LayerGroup,
+  useMapEvents,
+} from 'react-leaflet';
 import {
   polyfill,
   h3ToParent,
-  h3ToGeoBoundary, compact
+  h3ToGeoBoundary, compact, geoToH3
 } from "h3-js";
 
 const revertCoords = (coords) => coords.map(item => [item[1], item[0]]);
@@ -43,18 +50,20 @@ const coordinates = [
     [-71.069508, 42.335012]
   ]
 ];
+
 const GeofencingMan = ({ res, treshold }) => {
+  const hexagons = polyfill(coordinates[0], +res || 9, true);
+
+  const [allHexagons, setAllHexagons] = useState(hexagons);
+
   const colorRed = { color: 'red' };
   const colorBlue = { color: 'blue' };
   const colorGreen = { color: 'green' };
   const colorBrown = { color: 'brown' };
 
-  // Convert polygon to hexagons
-  const hexagons = polyfill(coordinates[0], +res || 9, true);
+  const polyfillResults = allHexagons.map(a => h3ToGeoBoundary(a));
 
-  const polyfillResults = hexagons.map(a => h3ToGeoBoundary(a));
-
-  const compacted = compact(hexagons);
+  const compacted = compact(allHexagons);
   // const coordsCompacted = compacted.map(a => h3ToGeoBoundary(a));
   const coordsCompacted2 = compacted.map((item, index) => ({
     id: index,
@@ -99,33 +108,56 @@ const GeofencingMan = ({ res, treshold }) => {
     }));
   };
 
-  const results = replaceWithParents(hexagons, treshold, res);
+  const results = replaceWithParents(allHexagons, treshold, res);
+
+
+  const LocationMarker = () => {
+    useMapEvents({
+      click: (e) => {
+        const newHex = getH3PolygonIndex(e.latlng);
+        if (!allHexagons.includes(newHex)) {
+          setAllHexagons([...allHexagons, newHex]);
+        } else {
+          setAllHexagons(allHexagons.filter(hex => hex !== newHex));
+        }
+      }
+    });
+    return null;
+  };
+
+  const getH3PolygonIndex = (currentCoords) => {
+    return geoToH3(currentCoords.lat, currentCoords.lng, res);
+  };
 
   return (
     <MapContainer center={[42.355143, -71.07476]} zoom={14}
                   scrollWheelZoom={false}>
+      <LocationMarker />
       <LayersControl position="topright">
         <LayersControl.BaseLayer checked name="Map">
           <LayerGroup>
-          <TileLayer
-            attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          />
-          <Polygon pathOptions={colorBlue} positions={revertCoords(coordinates[0])} />
-            </LayerGroup>
+            <TileLayer
+              attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
+            <Polygon pathOptions={colorBlue}
+                     positions={revertCoords(coordinates[0])} />
+          </LayerGroup>
         </LayersControl.BaseLayer>
         <LayersControl.Overlay checked name="Parents">
-          <Polygon pathOptions={colorRed} positions={results.map(r=>r.coords)} />)}
+          <Polygon pathOptions={colorRed}
+                   positions={results.map(r => r.coords)} />)}
           {/*{results.map(result => <Polygon key={result.id} pathOptions={colorRed}*/}
           {/*                                positions={result.coords} />)}*/}
         </LayersControl.Overlay>
 
         <LayersControl.Overlay checked name="Compact">
           <LayerGroup>
-          {/*<Polygon pathOptions={colorGreen} positions={coordsCompacted} />*/}
-          {coordsCompacted2.map(el => <Polygon key={el.id} pathOptions={colorGreen}
-                                          positions={el.coords} />)}
-            </LayerGroup>
+            {/*<Polygon pathOptions={colorGreen} positions={coordsCompacted} />*/}
+            {coordsCompacted2.map(el => <Polygon key={el.id}
+                                                 pathOptions={colorGreen}
+                                                 positions={el.coords} />)}
+          </LayerGroup>
         </LayersControl.Overlay>
 
         <LayersControl.Overlay name="Polyfill">
@@ -135,6 +167,6 @@ const GeofencingMan = ({ res, treshold }) => {
       </LayersControl>
     </MapContainer>
   );
-}
+};
 
 export default GeofencingMan;
