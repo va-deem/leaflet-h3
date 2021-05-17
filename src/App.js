@@ -10,12 +10,14 @@ import { useState } from 'react';
 import GeofencingCompact from './components/GeofencingCompact';
 import GeofencingReal from './components/GeofencingReal';
 import GeofencingMan from './components/GeofencingMan';
+import Rome from './components/Rome';
 
 const App = () => {
   const [res, setRes] = useState(9);
   const [resCompact, setResCompact] = useState(9);
   const [resReal, setResReal] = useState(9);
   const [resMan, setResMan] = useState(9);
+  const [resRome, setResRome] = useState(9);
   const [treshold, setTreshold] = useState(1);
 
   const onSelectChange = (e, isCompact) => {
@@ -28,6 +30,9 @@ const App = () => {
         break;
       case 'man':
         setResMan(e.target.value);
+        break;
+      case 'rome':
+        setResRome(e.target.value);
         break;
       default:
         setRes(e.target.value);
@@ -68,6 +73,12 @@ const App = () => {
           path="/geofencing-man"
           render={(props) => (
             <GeofencingMan {...props} res={resMan} treshold={treshold} />
+          )}
+        />
+        <Route
+          path="/geofencing-rome"
+          render={(props) => (
+            <Rome {...props} res={resRome} treshold={treshold} />
           )}
         />
       </Switch>

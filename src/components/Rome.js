@@ -16,10 +16,10 @@ import { zones } from '../data/zones'
 
 const revertCoords = (coords) => coords.map(item => [item[1], item[0]]);
 
-const coordinates = zones.boston;
+const coordinates = zones.rome;
 const mapCenter = revertCoords(coordinates[0]).pop();
 
-const GeofencingMan = ({ res, treshold }) => {
+const Rome = ({ res, treshold }) => {
   const hexagons = polyfill(coordinates[0], +res || 9, true);
 
   const [allHexagons, setAllHexagons] = useState(hexagons);
@@ -135,4 +135,4 @@ const GeofencingMan = ({ res, treshold }) => {
   );
 };
 
-export default GeofencingMan;
+export default Rome;
