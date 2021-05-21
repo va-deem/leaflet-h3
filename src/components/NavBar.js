@@ -31,13 +31,13 @@ const NavBar = ({ onSelectChange, onTresholdChange }) => {
         <li><NavLink to="/geofencing-real" activeClassName="selected">HEX
           Real </NavLink></li>
         <li>&nbsp;</li>
-        <li><NavLink to="/geofencing-man" activeClassName="selected">HEX
+        <li><NavLink to="/geofencing-boston" activeClassName="selected">HEX
           Boston </NavLink>
           <br />
           <ul>
             <li>
               res polyfill (all):
-              <select onChange={(e) => onSelectChange(e, 'man')}
+              <select onChange={(e) => onSelectChange(e, 'boston')}
                       defaultValue={9}>
                 <option value="7">7</option>
                 <option value="8">8</option>
@@ -50,7 +50,7 @@ const NavBar = ({ onSelectChange, onTresholdChange }) => {
             </li>
             <li>
               treshold (parents):
-              <select onChange={(e) => onTresholdChange(e)} defaultValue={1}>
+              <select onChange={(e) => onTresholdChange(e, 'boston')} defaultValue={1}>
                 <option value="0">0</option>
                 <option value="1">1</option>
                 <option value="2">2</option>
@@ -78,7 +78,7 @@ const NavBar = ({ onSelectChange, onTresholdChange }) => {
             </li>
             <li>
               treshold (parents):
-              <select onChange={(e) => onTresholdChange(e)} defaultValue={1}>
+              <select onChange={(e) => onTresholdChange(e, 'rome')} defaultValue={1}>
                 <option value="0">0</option>
                 <option value="1">1</option>
                 <option value="2">2</option>

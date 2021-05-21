@@ -19,52 +19,51 @@ const revertCoords = (coords) => coords.map(item => [item[1], item[0]]);
 const coordinates = zones.boston;
 const mapCenter = revertCoords(coordinates[0]).pop();
 
-const GeofencingMan = ({ res, treshold }) => {
+const Boston = ({ res, treshold }) => {
   const hexagons = polyfill(coordinates[0], +res, true);
   const [allHexagons, setAllHexagons] = useState(hexagons);
+  // Used to render layer of polyfilled hexagons
+  const coordsPolyfilled = hexagons.map(a => h3ToGeoBoundary(a));
 
-  // Used to render layer of polufilled hexagons
-  const coordsPolyfilled = allHexagons.map(a => h3ToGeoBoundary(a));
+  const replaceWithParents = (hexagonsArr, treshold, res) => {
+    const parentRes = res - 1; // coarser resolution than hexagons
 
-  // const replaceWithParents = (hexagonsArr, treshold, res) => {
-  //   const parentRes = res - 1; // coarser resolution than hexagons
-  //
-  //   // The hexagons with their parents
-  //   const hexWithParents = hexagonsArr.map(hex => ({
-  //     hexagon: hex,
-  //     parent: h3ToParent(hex, parentRes)
-  //   }));
-  //
-  //   // Array of unique parents
-  //   const uniqueParents = [...new Set(hexWithParents.map(hex => hex.parent))];
-  //
-  //   // Get all childen of every parent
-  //   const parentWithChildren = [];
-  //   for (let i = 0; i < uniqueParents.length; i += 1) {
-  //     const children = hexWithParents.reduce((acc, item) => {
-  //       if (item.parent === uniqueParents[i]) {
-  //         acc.push(item.hexagon);
-  //       }
-  //       return acc;
-  //     }, []);
-  //
-  //     parentWithChildren.push({
-  //       parent: uniqueParents[i],
-  //       childrenCount: children.length
-  //     });
-  //   }
-  //
-  //   // Find parents only with childrenCount >= treshold
-  //   const filtered = parentWithChildren.filter(item => item.childrenCount >= treshold);
-  //
-  //   // Return h3Indices converted to coordinates
-  //   return filtered.map((item, index) => ({
-  //     id: index,
-  //     coords: h3ToGeoBoundary(item.parent)
-  //   }));
-  // };
-  //
-  // const results = replaceWithParents(allHexagons, treshold, res);
+    // The hexagons with their parents
+    const hexWithParents = hexagonsArr.map(hex => ({
+      hexagon: hex,
+      parent: h3ToParent(hex, parentRes)
+    }));
+
+    // Array of unique parents
+    const uniqueParents = [...new Set(hexWithParents.map(hex => hex.parent))];
+
+    // Get all childen of every parent
+    const parentWithChildren = [];
+    for (let i = 0; i < uniqueParents.length; i += 1) {
+      const children = hexWithParents.reduce((acc, item) => {
+        if (item.parent === uniqueParents[i]) {
+          acc.push(item.hexagon);
+        }
+        return acc;
+      }, []);
+
+      parentWithChildren.push({
+        parent: uniqueParents[i],
+        childrenCount: children.length
+      });
+    }
+
+    // Find parents only with childrenCount >= treshold
+    const filtered = parentWithChildren.filter(item => item.childrenCount >= treshold);
+
+    // Return h3Indices converted to coordinates
+    return filtered.map((item, index) => ({
+      id: index,
+      coords: h3ToGeoBoundary(item.parent)
+    }));
+  };
+
+  const results = replaceWithParents(allHexagons, treshold, res);
 
   const LocationMarker = () => {
     useMapEvents({
@@ -121,10 +120,10 @@ const GeofencingMan = ({ res, treshold }) => {
             <Polygon positions={revertCoords(coordinates[0])} />
           </LayerGroup>
         </LayersControl.BaseLayer>
-        {/*<LayersControl.Overlay checked name="Parents">*/}
-        {/*  <Polygon pathOptions={{color: "red"}}*/}
-        {/*           positions={results.map(r => r.coords)} />)}*/}
-        {/*</LayersControl.Overlay>*/}
+        <LayersControl.Overlay checked name="Parents">
+          <Polygon pathOptions={{color: "red"}}
+                   positions={results.map(r => r.coords)} />)}
+        </LayersControl.Overlay>
 
         <LayersControl.Overlay checked name="Compact">
           <LayerGroup>
@@ -142,4 +141,4 @@ const GeofencingMan = ({ res, treshold }) => {
   );
 };
 
-export default GeofencingMan;
+export default Boston;

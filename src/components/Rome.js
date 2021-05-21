@@ -10,9 +10,9 @@ import {
 import {
   polyfill,
   h3ToParent,
-  h3ToGeoBoundary, compact, geoToH3
+  h3ToGeoBoundary, compact, geoToH3, h3GetResolution
 } from "h3-js";
-import { zones } from '../data/zones'
+import { zones } from '../data/zones';
 
 const revertCoords = (coords) => coords.map(item => [item[1], item[0]]);
 
@@ -20,22 +20,11 @@ const coordinates = zones.rome;
 const mapCenter = revertCoords(coordinates[0]).pop();
 
 const Rome = ({ res, treshold }) => {
-  const hexagons = polyfill(coordinates[0], +res || 9, true);
-
+  const hexagons = polyfill(coordinates[0], +res, true);
   const [allHexagons, setAllHexagons] = useState(hexagons);
 
-  const colorRed = { color: 'red' };
-  const colorBlue = { color: 'blue' };
-  const colorGreen = { color: 'green' };
-  const colorBrown = { color: 'brown' };
-
-  const polyfillResults = allHexagons.map(a => h3ToGeoBoundary(a));
-
-  const compacted = compact(allHexagons);
-  const coordsCompacted2 = compacted.map((item, index) => ({
-    id: index,
-    coords: h3ToGeoBoundary(item)
-  }));
+  // Used to render layer of polufilled hexagons
+  const coordsPolyfilled = hexagons.map(a => h3ToGeoBoundary(a));
 
   const replaceWithParents = (hexagonsArr, treshold, res) => {
     const parentRes = res - 1; // coarser resolution than hexagons
@@ -80,23 +69,46 @@ const Rome = ({ res, treshold }) => {
   const LocationMarker = () => {
     useMapEvents({
       click: (e) => {
-        const newHex = getH3PolygonIndex(e.latlng);
-        if (!allHexagons.includes(newHex)) {
-          setAllHexagons([...allHexagons, newHex]);
+        const newHexH3Index = geoToH3(e.latlng.lat, e.latlng.lng, res);
+
+        const isInside = allHexagons.includes(newHexH3Index);
+        const isParentInside = allHexagons.includes(h3ToParent(newHexH3Index, res - 1));
+
+        // Do not allow add new hexes inside existing parents with res-1
+        if (isParentInside) return;
+
+        if (isInside) {
+          // Remove hex if it is on the map
+          setAllHexagons(allHexagons.filter(hex => hex !== newHexH3Index));
         } else {
-          setAllHexagons(allHexagons.filter(hex => hex !== newHex));
+          // Add new
+          setAllHexagons([...allHexagons, newHexH3Index]);
         }
       }
     });
     return null;
   };
 
-  const getH3PolygonIndex = (currentCoords) => {
-    return geoToH3(currentCoords.lat, currentCoords.lng, res);
+
+  // Render compacted hexes for each resolution
+  const renderCompactedCoords = (hexagonsArray) => {
+    const uniqueResolutions = [...new Set(hexagonsArray.map(h => h3GetResolution(h)))];
+
+    return uniqueResolutions.map(res => {
+      const compacted = compact(allHexagons.filter(h => h3GetResolution(h) === res));
+      const coordsCompacted = compacted.map((item, index) => ({
+        id: index,
+        coords: h3ToGeoBoundary(item)
+      }));
+
+      return coordsCompacted.map(el => <Polygon key={el.id}
+                                                pathOptions={{ color: "green" }}
+                                                positions={el.coords} />);
+    });
   };
 
   return (
-    <MapContainer center={mapCenter} zoom={14}
+    <MapContainer center={mapCenter} zoom={12}
                   scrollWheelZoom={true}>
       <LocationMarker />
       <LayersControl position="topright">
@@ -106,28 +118,23 @@ const Rome = ({ res, treshold }) => {
               attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
-            <Polygon pathOptions={colorBlue}
-                     positions={revertCoords(coordinates[0])} />
+            <Polygon positions={revertCoords(coordinates[0])} />
           </LayerGroup>
         </LayersControl.BaseLayer>
         <LayersControl.Overlay checked name="Parents">
-          <Polygon pathOptions={colorRed}
+          <Polygon pathOptions={{color: "red"}}
                    positions={results.map(r => r.coords)} />)}
-          {/*{results.map(result => <Polygon key={result.id} pathOptions={colorRed}*/}
-          {/*                                positions={result.coords} />)}*/}
         </LayersControl.Overlay>
 
         <LayersControl.Overlay checked name="Compact">
           <LayerGroup>
-            {/*<Polygon pathOptions={colorGreen} positions={coordsCompacted} />*/}
-            {coordsCompacted2.map(el => <Polygon key={el.id}
-                                                 pathOptions={colorGreen}
-                                                 positions={el.coords} />)}
+            {renderCompactedCoords(allHexagons)}
           </LayerGroup>
         </LayersControl.Overlay>
 
         <LayersControl.Overlay name="Polyfill">
-          <Polygon pathOptions={colorBrown} positions={polyfillResults} />
+          <Polygon pathOptions={{ color: "brown" }}
+                   positions={coordsPolyfilled} />
         </LayersControl.Overlay>
 
       </LayersControl>

@@ -9,16 +9,17 @@ import GeofencingSingleHex from './components/GeofencingSingleHex';
 import { useState } from 'react';
 import GeofencingCompact from './components/GeofencingCompact';
 import GeofencingReal from './components/GeofencingReal';
-import GeofencingMan from './components/GeofencingMan';
+import Boston from './components/Boston';
 import Rome from './components/Rome';
 
 const App = () => {
   const [res, setRes] = useState(9);
   const [resCompact, setResCompact] = useState(9);
   const [resReal, setResReal] = useState(9);
-  const [resMan, setResMan] = useState(9);
+  const [resBoston, setResBoston] = useState(9);
   const [resRome, setResRome] = useState(9);
-  const [treshold, setTreshold] = useState(1);
+  const [trBoston, setTrBoston] = useState(1);
+  const [trRome, setTrRome] = useState(1);
 
   const onSelectChange = (e, isCompact) => {
     switch (isCompact) {
@@ -28,8 +29,8 @@ const App = () => {
       case 'real':
         setResReal(e.target.value);
         break;
-      case 'man':
-        setResMan(e.target.value);
+      case 'boston':
+        setResBoston(e.target.value);
         break;
       case 'rome':
         setResRome(e.target.value);
@@ -39,8 +40,18 @@ const App = () => {
     }
   };
 
-  const onTresholdChange = (e) => {
-    setTreshold(e.target.value);
+  const onTresholdChange = (e, trType) => {
+    console.log(trType);
+    switch (trType) {
+      case 'boston':
+        setTrBoston(e.target.value);
+        break;
+      case 'rome':
+        setTrRome(e.target.value);
+        break;
+      default:
+        break;
+    }
   };
 
   return (
@@ -70,15 +81,15 @@ const App = () => {
           )}
         />
         <Route
-          path="/geofencing-man"
+          path="/geofencing-boston"
           render={(props) => (
-            <GeofencingMan {...props} res={resMan} treshold={treshold} />
+            <Boston {...props} res={resBoston} treshold={trBoston} />
           )}
         />
         <Route
           path="/geofencing-rome"
           render={(props) => (
-            <Rome {...props} res={resRome} treshold={treshold} />
+            <Rome {...props} res={resRome} treshold={trRome} />
           )}
         />
       </Switch>
